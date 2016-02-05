@@ -25,7 +25,7 @@ void setup()
 
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[3]; // assigning  usbmodem1421
+  String portname = Serial.list()[2]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
 
   // R connection set up
@@ -33,9 +33,8 @@ void setup()
 
     // connect to Rserve (if the user specified a server at the command line, use it, otherwise connect locally)
     RConnection c = new RConnection();
-    c.serverEval("xcor <- 0; ycor <- 0 ; zcor <- 0");
-    c.serverEval("require(scatterplot3d); require(Cairo)");
-    //c.serverEval("source('~/Documents/Processing/String_Read/code/sqrt3d_file.R')");
+    c.serverEval("require(scatterplot3d); require(Cairo); require(dplyr)");
+    c.serverEval("source('/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/Functions_Server.R')");
 
     println("Rconnection Established");
 
@@ -67,11 +66,11 @@ void draw()
     EklvyaData = EklvyaPort.readStringUntil('\n'); // Read data from serial
     if (EklvyaData != null) // to check real data is available 
     {
-      //println(EklvyaData);
+      println(EklvyaData);
       // Data Fromat : F1,Acccalib,Magcalib,GyroCalib,LinAccX,LinAccY,LinAccZ,GravAccX,GravAccY,GravAccZ,EulerX,EulerY,EulerZ,F2,Acccalib,Magcalib,GyroCalib,LinAccX,LinAccY,LinAccZ,GravAccX,GravAccY,GravAccZ,EulerX,EulerY,EulerZ,
       String[] EklvyaParsedData = split(EklvyaData.trim(), ','); // Trim to remove white space & separate data at ,
-      //println (EklvyaParsedData);
-      //println(EklvyaParsedData.length);
+      println (EklvyaParsedData);
+      println(EklvyaParsedData.length);
       if (EklvyaParsedData.length == 26) // To check for valid frame
       {
         Calib1 = StringParseFloat (EklvyaParsedData, 1); // Frame1 Calib data extraction
@@ -111,12 +110,24 @@ void draw()
       RConnection c = new RConnection();
 
       println("Rconnection Established");
+      String device = "CairoJPEG";
       // Create jpeg file
       REXP xp = c.parseAndEval("try(CairoJPEG('test.jpg',quality=90))");
+      if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
+        System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
+        // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
+        REXP w = c.eval("if (exists('last.warning') && length(last.warning)>0) names(last.warning)[1] else 0");
+        if (w.isString()) System.err.println(w.asString());
+        return;
+      }
+      println("Debug1");
       // Evaluating scatter Plot
-      c.parseAndEval("scatterplot3d(xcor, ycor, zcor); dev.off()");
+      c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ);dev.off()");
+      
+      println("Debug2");
       //Getting path from R for image
       String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+      println(pathvariable);
       //loading image in PImage class for display purpose
       imgR = loadImage(pathvariable);
       //deleting generated file to preserve space on server.
@@ -124,7 +135,7 @@ void draw()
       
       
       // Store data
-      c.serverEval("xcor <- c(xcor," + linAcc1[0] +","+linAcc2[0] +");"+"ycor <-c(ycor,"  + linAcc1[1] +","+linAcc2[1] +");"+"zcor <- c(zcor," +   linAcc1[2] +","+linAcc2[2]  +")" );
+      c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
       // close RConnection, we're done
       c.close();
     } 
