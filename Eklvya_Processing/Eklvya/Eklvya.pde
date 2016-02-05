@@ -5,7 +5,7 @@ import org.rosuda.REngine.*;
 
 Serial EklvyaPort; // Serial port
 String EklvyaData; // Serial data received
-int EklvyaBaudRate = 9600; // port baud rate
+int EklvyaBaudRate = 115200; // port baud rate
 float[] Calib1 = new float[3]; // Frame 1 Acccalib, Magcalib, GyroCalib
 float[] Calib2 = new float[3]; // Frame 1 Acccalib, Magcalib, GyroCalib
 float[] linAcc1 = new float[3]; // Frame 1 LinAccX, LinAccY, LinAccZ
