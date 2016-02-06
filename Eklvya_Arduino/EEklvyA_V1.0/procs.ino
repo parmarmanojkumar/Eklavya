@@ -4,9 +4,9 @@ void proc_ini()
   pinMode(led,OUTPUT);
   pinMode(Buzzer1,OUTPUT);
   pinMode(Buzzer1,OUTPUT);
-  Buzz(led);
+  //Buzz(led);
   //delay(1000);
-  StopBuzz(led);
+  //StopBuzz(led);
   Buzz(Buzzer1);
   Buzz(Buzzer2);
   //delay(1000);
@@ -138,24 +138,16 @@ void proc_500ms()
       else if(cmd=='h') 
       {
         digitalWrite(13,HIGH);
-        delay(500);
-        digitalWrite(13,LOW);
-        delay(500);
-        digitalWrite(13,HIGH);
+          Buzz(Buzzer1);
+  
+  StopBuzz(Buzzer2);
       }
       else if(cmd=='n') 
       {
-        digitalWrite(13,HIGH);
-        delay(500);
         digitalWrite(13,LOW);
-        delay(500);
-        digitalWrite(13,HIGH);
-        delay(500);
-        digitalWrite(13,LOW);
-        delay(500);
-        digitalWrite(13,HIGH);
-        delay(500);
-        digitalWrite(13,LOW);
+        Buzz(Buzzer2);
+  //delay(1000);
+  StopBuzz(Buzzer1);
       }
       else if(cmd=='r') 
       {
