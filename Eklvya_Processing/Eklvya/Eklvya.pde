@@ -27,6 +27,7 @@ PImage imgR  ; //image received from R
 int validSyncSignal = 0;
 boolean toggle = false;
 float boxing_trigger_type = 0; //
+float Target;
 
 
 
@@ -243,6 +244,10 @@ void draw()
 
   text(trigger_list, 510, 160);
   text(boxing_trigger_type, 650, 160);
+  if ((trigger_list=="Target PPM"))
+  {
+    Target = boxing_trigger_type;
+  }
   if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==0))
   {
     text("Punches Per Minute", 510, 200);
@@ -250,6 +255,10 @@ void draw()
     text("Punches Per Minute Max", 510, 240);
     text(ppmcountmmax, 510, 260);
     image(imgR, 0, 50);
+	 if(ppmcountmmax > Target)
+    {
+     EklvyaPort.write('a');
+    }
   } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
   {
     text("Punch Intensity Evaluation : ", 510, 200);

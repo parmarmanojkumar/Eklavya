@@ -29,6 +29,17 @@ void draw_UI()
   
   customize(d2); // customize the second list
   
+		cp5.addSlider("Target PPM")
+		.setPosition(100,550)
+		.setWidth(400)
+		.setRange(0,160) // values can range from big to small as well
+		.setValue(50)
+		.setNumberOfTickMarks(8)
+		.setSliderMode(Slider.FLEXIBLE)
+		;
+  // use Slider.FIX or Slider.FLEXIBLE to change the slider handle
+  // by default it is Slider.FIX
+  
   font = loadFont("CourierNew36.vlw");
 }
 
