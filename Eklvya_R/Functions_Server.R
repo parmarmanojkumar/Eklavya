@@ -176,16 +176,16 @@ punchperminutemax <- function(){
 
 intensitycalc <- function(x,y,z){
         par(fin= c(5,5),mfrow=c(2,2) )
-        frame_length = 50
+        frame_length = 25
         intensity_threshold = 20
         ppm_intensity = 0
         idx = length(x) - frame_length
         #print("debug1")
-        if (idx > 0) {
-                ppm_intensity = sqrt(x[-idx:0]**2 + y[-idx:0]**2 + z[-idx:0]**2)
-        }else{
-                ppm_intensity = sqrt(x**2 + y**2 + z**2)
-        }
+#         if (idx > 0) {
+#                 ppm_intensity = sqrt(x[-idx:0]**2 + y[-idx:0]**2 + z[-idx:0]**2)
+#         }else{
+#                 ppm_intensity = sqrt(x**2 + y**2 + z**2)
+#         }
         #print("debug2")
         #print(ppm_intensity)
         # 50 frames @200ms corresponds to 10 second so ppm is multiplied by 6
@@ -199,16 +199,19 @@ intensitycalc <- function(x,y,z){
         if (idx > 0) {
                 #print(-idx)
                 plot(Finalfp[-idx:0], type='l', col = 'blue', 
-                     xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
-                meanfp=max(Finalfp[-idx:0])
+                     xlab = "Time stamp", ylab="pound force", main=" Pound Force (@25 kg Punch bag)")
+                maxfp=max(Finalfp[-idx:0])
         }else{
                 plot(Finalfp, type='l', col = 'blue', 
-                     xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
-                meanfp = max(Finalfp)
+                     xlab = "Time stamp", ylab="pound force", main="Pound Force (@25 kg Punch bag)")
+                maxfp = max(Finalfp)
                 
         }
-        abline(h=meanfp)
-        text(1,0, paste0("Mean intensity : ",round(meanppm,digits = 1)), col = "gray60", adj = c(0, -.1))
+        if (is.na(maxfp)){
+                maxfp == 0
+        }
+        #abline(h=meanfp)
+        text(1,0, paste0("Max intensity : ",round(maxfp,digits = 1)), col = "gray60", adj = c(0, -.1))
         #print("debug4")
         
 }
@@ -227,17 +230,45 @@ intensitycount <- function(){
         }
         xd = (xdl < -2) * xdl
         xds = abs((xd - smooth(xd, "3RS3R")))
-        x = sum(xds > 15)
+        x = (xds > 15)
         xf = xdl[x]
         yf = ydl[x]
         zf = zdl[x]
         allf =  sqrt((xf)**2 + (yf)**2 + (zf)**2)
-        allf[allf==0] <- NA
-        intensity <- median(xf, na.rm = T)
-        forceN <- intensity * 5 # ms2 into mass 5 kg 
+        #print(allf)
+        #allf[allf==0] <- NA
+        intensity <- median(allf, na.rm = T)
+        if (is.na(intensity)){
+                intensity = 0
+        }
+        #print(intensity)
+        forceN <- intensity * 25 # ms2 into mass 5 kg 
         forcepound <- forceN * 0.224809
         Finalfp <<-  Finalfp %>% c(forcepound)
         forcepound
+}
+
+intensitymax <- function(){
+        frame_length = 25
+        idx = length(Finalfp) - frame_length
+        if (idx > 0) {
+                maxfp = max(Finalfp[-idx:0])
+        }else{
+                maxfp = max(Finalfp)
+        }
+        if (is.na(maxfp)){
+                return(0)
+        }else{
+                return(maxfp)
+        }
+}
+
+lastintenistyout <- function(){
+        if (is.na(Finalfp[length(Finalfp)])){
+                return (0)
+        }else{
+                return(Finalfp[length(Finalfp)])
+        }
 }
 
 initVariables()

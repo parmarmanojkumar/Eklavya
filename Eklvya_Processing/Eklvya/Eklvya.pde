@@ -27,7 +27,7 @@ PImage imgR  ; //image received from R
 int validSyncSignal = 0;
 boolean toggle = false;
 float boxing_trigger_type = 0; //
- 
+
 
 
 //Initial set up 
@@ -39,7 +39,7 @@ void setup()
   background(0);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[2]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[3]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   draw_UI();
   // R connection set up
@@ -64,13 +64,15 @@ void setup()
       +e.getMessage());
     e.printStackTrace();
   }
-  imgR  = loadImage("test.jpg");
+  imgR  = loadImage("test1.jpg");
 }
 
 // Main function
 
 int ppmcount = 0;
 int ppmcountmmax = 0;
+int intensitycount = 0;
+int intensitymax = 0;
 void draw()
 {
   //UI
@@ -106,7 +108,7 @@ void draw()
     }
   }
   drawCube();
-  image(imgR, 0, 50);
+  
 
   //Step 2 : R connection
   if (validframe == 1 ) // If frame is valid then only process it
@@ -146,60 +148,60 @@ void draw()
       }
       println("Debug1");
       //Intensity regime for boxing for PPM
-      if(boxing_trigger_type == 0 )
+      if (boxing_trigger_type == 0 )
       {
-      // Evaluating scatter Plot
-      //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
-      c.parseAndEval("punchperminutecalc(LinAccX,LinAccY,LinAccZ);dev.off()");
-      //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
-      println("Debug2");
-      //Getting path from R for image
-      String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
-      //println(pathvariable);
-      //loading image in PImage class for display purpose
-      imgR = loadImage(pathvariable);
-      //deleting generated file to preserve space on server.
-      c.parseAndEval("unlink('test.jpg')");
+        // Evaluating scatter Plot
+        //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
+        c.parseAndEval("punchperminutecalc(LinAccX,LinAccY,LinAccZ);dev.off()");
+        //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
+        println("Debug2");
+        //Getting path from R for image
+        String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+        //println(pathvariable);
+        //loading image in PImage class for display purpose
+        imgR = loadImage(pathvariable);
+        //deleting generated file to preserve space on server.
+        c.parseAndEval("unlink('test.jpg')");
 
-      c.serverEval("punchperminutecount()");
-      //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
-      //println(ppmcount);
-      ppmcount = c.parseAndEval("punchperminutout()").asInteger();
-      //println(ppmcount);
-      ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
-      //println(ppmmax);
+        c.serverEval("punchperminutecount()");
+        //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
+        //println(ppmcount);
+        ppmcount = c.parseAndEval("punchperminutout()").asInteger();
+        //println(ppmcount);
+        ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
+        //println(ppmmax);
 
-      // Store data
-      c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        // Store data
+        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
       }
       // Intensity regime with punch force
-      if(boxing_trigger_type == 1 )
+      if (boxing_trigger_type == 1 )
       {
-      // Evaluating scatter Plot
-      //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
-      c.parseAndEval("intensitycalc(LinAccX,LinAccY,LinAccZ);dev.off()");
-      //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
-      println("Debug2");
-      //Getting path from R for image
-      String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
-      //println(pathvariable);
-      //loading image in PImage class for display purpose
-      imgR = loadImage(pathvariable);
-      //deleting generated file to preserve space on server.
-      c.parseAndEval("unlink('test.jpg')");
+        // Evaluating scatter Plot
+        //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
+        c.parseAndEval("intensitycalc(LinAccX,LinAccY,LinAccZ);dev.off()");
+        //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
+        println("Debug2");
+        //Getting path from R for image
+        String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+        //println(pathvariable);
+        //loading image in PImage class for display purpose
+        imgR = loadImage(pathvariable);
+        //deleting generated file to preserve space on server.
+        c.parseAndEval("unlink('test.jpg')");
 
-      c.serverEval("punchperminutecount()");
-      //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
-      //println(ppmcount);
-      ppmcount = c.parseAndEval("punchperminutout()").asInteger();
-      //println(ppmcount);
-      ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
-      //println(ppmmax);
+        c.serverEval("intensitycount()");
+        //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
+        //println(ppmcount);
+        intensitycount = c.parseAndEval("lastintenistyout()").asInteger();
+        //println(ppmcount);
+        intensitymax = c.parseAndEval("intensitymax()").asInteger();
+        //println(ppmmax);
 
-      // Store data
-      c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        // Store data
+        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
       }
-      
+
       // close RConnection, we're done
       //c.close();
     } 
@@ -235,10 +237,10 @@ void draw()
       }
     }
   }
-  
+
   //  textAlign(LEFT, TOP);
   text("EnggEklvyA", 20, 20);
-  
+
   text(trigger_list, 510, 160);
   text(boxing_trigger_type, 650, 160);
   if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==0))
@@ -247,15 +249,20 @@ void draw()
     text(ppmcount, 510, 220);
     text("Punches Per Minute Max", 510, 240);
     text(ppmcountmmax, 510, 260);
-
-  }
-  else if((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
+    image(imgR, 0, 50);
+  } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
   {
-    text("Punch Evaluation", 510, 200);
-  
-  }
-  else
+    text("Punch Intensity Evaluation : ", 510, 200);
+    text("Last punch Intensity :", 510, 220);
+    text(intensitycount, 510, 240);
+    text("Max intenisty : ", 510, 260);
+    text(intensitymax, 510, 280);
+    image(imgR, 0, 50);
+  } else
   {
-  //draw nothing
+      text("Select Sport Regime After gyro calibration", 510, 200);
+      imgR  = loadImage("test1.jpg");
+      image(imgR, 0, 50);
+    
   }
 }
