@@ -5,8 +5,6 @@ import org.rosuda.REngine.*;
 import processing.opengl.*;
 import controlP5.*;
 
-
-
 //UI related parameters
 ControlP5 cp5; //control pbject for dropdown boxes
 DropdownList d1, d2;
@@ -41,7 +39,7 @@ void setup()
   background(0);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[2]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[0]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   draw_UI();
   // R connection set up
@@ -81,7 +79,6 @@ void draw()
   // Step 1 : Data import from Arduino
 
   int validframe = 0; // to check valiity of frame
-  int start, end ; // for string parsing
   if (EklvyaPort.available() > 0) // If data  is avilable on serial
   { 
     EklvyaData = EklvyaPort.readStringUntil('\n'); // Read data from serial

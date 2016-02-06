@@ -1,14 +1,14 @@
 void drawCube()
 { 
-    pushMatrix(); //saves the current co-ordinate system
-    translate(610, 450, 0);
-    scale(3,3,3);
-    frame();
-    rotateZ(radians(-Euler[2]));
-    rotateX(radians(-Euler[1]));
-    rotateY(radians(-Euler[0]));
-    buildBoxShape();
-    fill(#ffffff);
+  pushMatrix(); //saves the current co-ordinate system
+  translate(610, 450, 0);
+  scale(3,3,3);
+  frame();
+  rotateZ(radians(-Euler[2]));
+  rotateX(radians(-Euler[1]));
+  rotateY(radians(-Euler[0]));
+  buildBoxShape();
+  fill(#ffffff);
   popMatrix();//restores that saved co-ordinate system
 }
 
@@ -52,7 +52,6 @@ void CalcEuler()
 
 void buildBoxShape() 
 {
-  //box(60, 10, 40);
   noStroke();
   beginShape(QUADS);
   
