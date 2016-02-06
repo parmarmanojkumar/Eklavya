@@ -73,8 +73,12 @@ void keyPressed() {
   }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8e973d81723e9d4b97582e9583c21aaee6e975bc
 String trigger_list = "Select Game";
+
 void controlEvent(ControlEvent theEvent) {
   // DropdownList is of type ControlGroup.
   // A controlEvent will be triggered from inside the ControlGroup class.
@@ -83,12 +87,10 @@ void controlEvent(ControlEvent theEvent) {
   // to avoid an error message thrown by controlP5.
 
   if (theEvent.isGroup()) {
-    // check if the Event was triggered from a ControlGroup
-    //println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
-    
+    // check if the Event was triggered from a ControlGroup   
   } 
-  else if (theEvent.isController()) {
-    //println("event from controller : "+theEvent.getController().getValue()+" from "+theEvent.getController());
+  else if (theEvent.isController()) 
+  {
     trigger_list = theEvent.getController().getName();
     boxing_trigger_type = theEvent.getController().getValue();
   }
