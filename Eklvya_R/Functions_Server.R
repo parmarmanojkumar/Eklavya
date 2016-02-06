@@ -17,6 +17,14 @@ initVariables <- function (){
         FinalppmVal <<- 0
         Finalfp <<- 0
         FinalfpVal <<- 0
+        
+        filepath <- "/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/uppercutpunch.txt"
+        uppercutdata <- read.table(filepath)
+        UpCutLinAccX <<- uppercutdata$meanpatternX
+        UpCutLinAccY <<- uppercutdata$meanpatternY
+        UpCutLinAccZ <<- uppercutdata$meanpatternZ
+        UpCutLm <<- lm(UpCutLinAccZ ~ UpCutLinAccX + UpCutLinAccY)
+        
 }
 
 updatecalib <- function(var1, var2, var3, var4, var5, var6){
@@ -47,7 +55,7 @@ updateEuler<- function(var1, var2, var3, var4, var5, var6){
 }
 
 updateplot3 <- function(x,y,z, setplot = 0){
-        par(fin= c(5,5),mfrow=c(2,2) )
+        par(fin= c(5,5),mfrow=c(2,2), lwd = 1 )
         frame_length = 50
         idx = length(x) - frame_length
         idx1 = length(x) - 10
@@ -106,7 +114,7 @@ updateplot3 <- function(x,y,z, setplot = 0){
 }
 
 punchperminutecalc <- function(x,y,z){
-        par(fin= c(5,5),mfrow=c(2,2) )
+        par(fin= c(5,5),mfrow=c(2,2), lwd = 1 )
         frame_length = 50
         intensity_threshold = 20
         ppm_intensity = 0
@@ -175,7 +183,7 @@ punchperminutemax <- function(){
 
 
 intensitycalc <- function(x,y,z){
-        par(fin= c(5,5),mfrow=c(2,2) )
+        par(fin= c(5,5),mfrow=c(2,2), lwd =1 )
         frame_length = 25
         intensity_threshold = 20
         ppm_intensity = 0
@@ -269,6 +277,36 @@ lastintenistyout <- function(){
         }else{
                 return(Finalfp[length(Finalfp)])
         }
+}
+
+accuracyregime <- function(){
+        par(fin= c(5,5),mfrow=c(1,1), lwd = 3)
+        frame_length = 13
+        idx = length(LinAccX) - frame_length
+        if (idx > 0){
+                xdl = (LinAccX[-idx:0])
+                ydl = (LinAccY[-idx:0])
+                zdl = (LinAccZ[-idx:0])
+                
+        }else{
+                xdl = LinAccX
+                ydl = LinAccY
+                zdl = LinAccZ
+        }
+        my.lm <- lm(zdl ~ xdl + ydl)
+        s3d <- scatterplot3d(xdl,ydl,zdl, type='o',
+                      col.axis="blue",highlight.3d=TRUE, 
+                      col.grid="lightblue",xlab = "Intensity X", 
+                      ylab="Intensity Y",zlab="Intensity Z", 
+                      main=" Lin Acc in 3D", xlim = c(-40,40),
+                      ylim = c(-40,40), zlim = c(-40,40), angle = 30) 
+        s3d$plane3d(my.lm, col = 'blue')
+        s3d$points3d(UpCutLinAccX,UpCutLinAccY,UpCutLinAccZ,col='red',type='o', pch = 8) 
+        s3d$plane3d(UpCutLm, col = 'red')
+        legend("topleft", inset=.05,      # location and inset
+               bty="n", cex=0.75,              # suppress legend box, shrink text 50%
+               title="Plane & Data Reference",
+               c("Reference", "Live Feed"), fill=c("red", "blue"))
 }
 
 initVariables()

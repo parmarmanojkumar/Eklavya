@@ -40,7 +40,7 @@ void setup()
   background(0);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[3]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[1]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   draw_UI();
   // R connection set up
