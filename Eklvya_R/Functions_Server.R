@@ -15,6 +15,8 @@ initVariables <- function (){
         EulerZ <<-0
         Finalppm <<- 0
         FinalppmVal <<- 0
+        Finalfp <<- 0
+        FinalfpVal <<- 0
 }
 
 updatecalib <- function(var1, var2, var3, var4, var5, var6){
@@ -169,4 +171,73 @@ punchperminutemax <- function(){
         }
         maxcount
 }
+
+
+
+intensitycalc <- function(x,y,z){
+        par(fin= c(5,5),mfrow=c(2,2) )
+        frame_length = 50
+        intensity_threshold = 20
+        ppm_intensity = 0
+        idx = length(x) - frame_length
+        #print("debug1")
+        if (idx > 0) {
+                ppm_intensity = sqrt(x[-idx:0]**2 + y[-idx:0]**2 + z[-idx:0]**2)
+        }else{
+                ppm_intensity = sqrt(x**2 + y**2 + z**2)
+        }
+        #print("debug2")
+        #print(ppm_intensity)
+        # 50 frames @200ms corresponds to 10 second so ppm is multiplied by 6
+        #         ppm_count = sum(ppm_intensity > intensity_threshold) * 6
+        #         Finalppm <<- Finalppm %>% c(ppm_count)
+        #         Finalppmval <<- ppm_count
+        #print(ppm_count)
+        updateplot3(x,y,z)
+        #print("debug3")
+        idx = length(Finalfp) - frame_length
+        if (idx > 0) {
+                #print(-idx)
+                plot(Finalfp[-idx:0], type='l', col = 'blue', 
+                     xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
+                meanfp=mean(Finalfp[-idx:0])
+        }else{
+                plot(Finalfp, type='l', col = 'blue', 
+                     xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
+                meanfp = mean(Finalfp)
+                
+        }
+        abline(h=meanfp)
+        text(1,0, paste0("Mean PPM : ",round(meanppm,digits = 1)), col = "gray60", adj = c(0, -.1))
+        #print("debug4")
+        
+}
+
+intensitycount <- function(){
+        frame_length = 50
+        idx = length(LinAccX) - frame_length
+        if (idx > 0) {
+                xdl = (LinAccX[-idx:0])
+                ydl = (LinAccY[-idx:0])
+                zdl = (LinAccZ[-idx:0])
+        }else{
+                xdl = LinAccX
+                ydl = LinAccY
+                zdl = LinAccZ
+        }
+        xd = (xdl < -2) * xdl
+        xds = abs((xd - smooth(xd, "3RS3R")))
+        x = sum(xds > 15)
+        xf = xdl[x]
+        yf = ydl[x]
+        zf = zdl[x]
+        allf =  sqrt((xf)**2 + (yf)**2 + (zf)**2)
+        allf[allf==0] <- NA
+        intensity <- median(xf, na.rm = T)
+        forceN <- intensity * 5 # ms2 into mass 5 kg 
+        forcepound <- forceN * 0.224809
+        Finalfp <<-  Finalfp %>% c(forcepound)
+        forcepound
+}
+
 initVariables()

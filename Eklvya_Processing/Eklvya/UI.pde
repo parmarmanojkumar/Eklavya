@@ -73,7 +73,7 @@ void keyPressed() {
   }
 }
 
-float trigger_type;
+
 String trigger_list = "Select Game";
 void controlEvent(ControlEvent theEvent) {
   // DropdownList is of type ControlGroup.
@@ -90,6 +90,6 @@ void controlEvent(ControlEvent theEvent) {
   else if (theEvent.isController()) {
     //println("event from controller : "+theEvent.getController().getValue()+" from "+theEvent.getController());
     trigger_list = theEvent.getController().getName();
-    trigger_type = theEvent.getController().getValue();
+    boxing_trigger_type = theEvent.getController().getValue();
   }
 }

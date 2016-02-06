@@ -28,7 +28,7 @@ float[] Euler = new float[3]; //Frame animation
 PImage imgR ; //image received from R
 int validSyncSignal = 0;
 boolean toggle = false;
-float trigger_type;
+float boxing_trigger_type = 1; //
  
 
 
@@ -146,6 +146,9 @@ void draw()
         return;
       }
       println("Debug1");
+      //Intensity regime for boxing for PPM
+      if(boxing_trigger_type == 0 )
+      {
       // Evaluating scatter Plot
       //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
       c.parseAndEval("punchperminutecalc(LinAccX,LinAccY,LinAccZ);dev.off()");
@@ -169,6 +172,35 @@ void draw()
 
       // Store data
       c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+      }
+      // Intensity regime with punch force
+      if(boxing_trigger_type == 1 )
+      {
+      // Evaluating scatter Plot
+      //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
+      c.parseAndEval("intensitycalc(LinAccX,LinAccY,LinAccZ);dev.off()");
+      //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
+      println("Debug2");
+      //Getting path from R for image
+      String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+      //println(pathvariable);
+      //loading image in PImage class for display purpose
+      imgR = loadImage(pathvariable);
+      //deleting generated file to preserve space on server.
+      c.parseAndEval("unlink('test.jpg')");
+
+      c.serverEval("punchperminutecount()");
+      //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
+      //println(ppmcount);
+      ppmcount = c.parseAndEval("punchperminutout()").asInteger();
+      //println(ppmcount);
+      ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
+      //println(ppmmax);
+
+      // Store data
+      c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+      }
+      
       // close RConnection, we're done
       //c.close();
     } 
@@ -210,8 +242,8 @@ void draw()
   text("EnggEklvyA", 20, 20);
   
   text(trigger_list, 510, 160);
-  text(trigger_type, 650, 160);
-  if ((trigger_list=="Sport_Regime") && (trigger_type==0))
+  text(boxing_trigger_type, 650, 160);
+  if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==0))
   {
     text("Punches Per Minute", 510, 200);
     text(ppmcount, 510, 220);
@@ -219,7 +251,7 @@ void draw()
     text(ppmcountmmax, 510, 260);
 
   }
-  else if((trigger_list=="Sport_Regime") && (trigger_type==1))
+  else if((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
   {
     text("Punch Evaluation", 510, 200);
   
