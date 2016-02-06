@@ -1,5 +1,6 @@
 void draw_UI()
 {
+
   cp5 = new ControlP5(this);
   
     // create a DropdownList, 
@@ -73,10 +74,6 @@ void keyPressed() {
   }
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 8e973d81723e9d4b97582e9583c21aaee6e975bc
 String trigger_list = "Select Game";
 
 void controlEvent(ControlEvent theEvent) {

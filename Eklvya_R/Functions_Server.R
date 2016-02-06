@@ -200,15 +200,15 @@ intensitycalc <- function(x,y,z){
                 #print(-idx)
                 plot(Finalfp[-idx:0], type='l', col = 'blue', 
                      xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
-                meanfp=mean(Finalfp[-idx:0])
+                meanfp=max(Finalfp[-idx:0])
         }else{
                 plot(Finalfp, type='l', col = 'blue', 
                      xlab = "Time stamp", ylab="Intensity", main=" Punch Per minute")
-                meanfp = mean(Finalfp)
+                meanfp = max(Finalfp)
                 
         }
         abline(h=meanfp)
-        text(1,0, paste0("Mean PPM : ",round(meanppm,digits = 1)), col = "gray60", adj = c(0, -.1))
+        text(1,0, paste0("Mean intensity : ",round(meanppm,digits = 1)), col = "gray60", adj = c(0, -.1))
         #print("debug4")
         
 }

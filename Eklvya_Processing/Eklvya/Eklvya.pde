@@ -23,10 +23,10 @@ float[] gravAcc2 = new float[3]; //Frame 2 GravAccX, GravAccY, GravAccZ
 float[] Euler1 = new float[3]; //Frame 1 EulerX, EulerY, EulerZ
 float[] Euler2 = new float[3]; //Frame 1 EulerX, EulerY, EulerZ
 float[] Euler = new float[3]; //Frame animation
-PImage imgR ; //image received from R
+PImage imgR  ; //image received from R
 int validSyncSignal = 0;
 boolean toggle = false;
-float boxing_trigger_type = 1; //
+float boxing_trigger_type = 0; //
  
 
 
@@ -39,7 +39,7 @@ void setup()
   background(0);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[0]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[2]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   draw_UI();
   // R connection set up
@@ -64,6 +64,7 @@ void setup()
       +e.getMessage());
     e.printStackTrace();
   }
+  imgR  = loadImage("test.jpg");
 }
 
 // Main function
@@ -74,6 +75,7 @@ void draw()
 {
   //UI
   fill(#ffffff);
+  background(0);
 
 
   // Step 1 : Data import from Arduino
@@ -103,8 +105,8 @@ void draw()
       }
     }
   }
-
   drawCube();
+  image(imgR, 0, 50);
 
   //Step 2 : R connection
   if (validframe == 1 ) // If frame is valid then only process it
@@ -211,7 +213,6 @@ void draw()
     }
 
     //image(imgR, 0, 0);
-    image(imgR, 0, 50);
   }
   if (validframe == 1) {
     if (EklvyaPort.available() == 0) {
