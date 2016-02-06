@@ -1,3 +1,4 @@
+#Function to run on server
 initVariables <- function (){
         # Initialization of variables
         Acccalib <<- 0
