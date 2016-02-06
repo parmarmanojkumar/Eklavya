@@ -17,6 +17,7 @@ initVariables <- function (){
         FinalppmVal <<- 0
         Finalfp <<- 0
         FinalfpVal <<- 0
+        UpCutCount <<- 0
         
         filepath <- "/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/uppercutpunch.txt"
         uppercutdata <- read.table(filepath)
@@ -24,6 +25,7 @@ initVariables <- function (){
         UpCutLinAccY <<- uppercutdata$meanpatternY
         UpCutLinAccZ <<- uppercutdata$meanpatternZ
         UpCutLm <<- lm(UpCutLinAccZ ~ UpCutLinAccX + UpCutLinAccY)
+        UpCutErr <<- 0
         
 }
 
@@ -307,6 +309,56 @@ accuracyregime <- function(){
                bty="n", cex=0.75,              # suppress legend box, shrink text 50%
                title="Plane & Data Reference",
                c("Reference", "Live Feed"), fill=c("red", "blue"))
+        
+        
+}
+
+accuracyregimeerror <- function(){
+        frame_length = 13
+        idx = length(LinAccX) - frame_length
+        if (idx > 0){
+                xdl = (LinAccX[-idx:0])
+                ydl = (LinAccY[-idx:0])
+                zdl = (LinAccZ[-idx:0])
+                
+        }else{
+                xdl = LinAccX
+                ydl = LinAccY
+                zdl = LinAccZ
+        }
+        err <- sqrt3d(UpCutLinAccX,UpCutLinAccY,UpCutLinAccZ,xdl,ydl,zdl )
+        UpCutErr <<- UpCutErr %>% c(err)
+        if (err <= 3 & (abs(xdl[1]) > 2)){
+                UpCutCount <<- UpCutCount %>% c(1)   
+        }else{
+                UpCutCount <<- UpCutCount %>% c(0)
+        }
+}
+
+upcuterrorout <- function(){
+        frame_length = 13
+        idx = length(UpCutErr) - frame_length
+        if (idx > 0) {
+                minerr = min(UpCutErr[-idx:0])
+        }else{
+                minerr = min(UpCutErr)
+        }
+        return(minerr * 100)
+}
+upcutcount <- function(){
+        frame_length = 13
+        idx = length(UpCutCount) - frame_length
+        if (idx > 0) {
+                upcutcount = sum(UpCutCount[-idx:0])
+        }else{
+                upcutcount = sum(UpCutCount)
+        }
+        return(sum(UpCutCount))
+}
+
+sqrt3d <- function (x1, y1, z1, x2, y2, z2){
+        intm <- sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
+        intm
 }
 
 initVariables()

@@ -74,6 +74,8 @@ int ppmcount = 0;
 int ppmcountmmax = 0;
 int intensitycount = 0;
 int intensitymax = 0;
+float UpCutErr = 0;
+int UpCutCount = 0;
 void draw()
 {
   //UI
@@ -109,7 +111,7 @@ void draw()
     }
   }
   drawCube();
-  
+
 
   //Step 2 : R connection
   if (validframe == 1 ) // If frame is valid then only process it
@@ -152,7 +154,6 @@ void draw()
       if (boxing_trigger_type == 0 )
       {
         // Evaluating scatter Plot
-        //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
         c.parseAndEval("punchperminutecalc(LinAccX,LinAccY,LinAccZ);dev.off()");
         //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
         println("Debug2");
@@ -165,12 +166,8 @@ void draw()
         c.parseAndEval("unlink('test.jpg')");
 
         c.serverEval("punchperminutecount()");
-        //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
-        //println(ppmcount);
         ppmcount = c.parseAndEval("punchperminutout()").asInteger();
-        //println(ppmcount);
         ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
-        //println(ppmmax);
 
         // Store data
         c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
@@ -179,9 +176,7 @@ void draw()
       if (boxing_trigger_type == 1 )
       {
         // Evaluating scatter Plot
-        //c.parseAndEval("updateplot3(LinAccX,LinAccY,LinAccZ,1);dev.off()");
         c.parseAndEval("intensitycalc(LinAccX,LinAccY,LinAccZ);dev.off()");
-        //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
         println("Debug2");
         //Getting path from R for image
         String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
@@ -190,15 +185,28 @@ void draw()
         imgR = loadImage(pathvariable);
         //deleting generated file to preserve space on server.
         c.parseAndEval("unlink('test.jpg')");
-
         c.serverEval("intensitycount()");
-        //ppmcount = c.parseAndEval("length(Finalppm)").asDouble();
-        //println(ppmcount);
         intensitycount = c.parseAndEval("lastintenistyout()").asInteger();
-        //println(ppmcount);
         intensitymax = c.parseAndEval("intensitymax()").asInteger();
-        //println(ppmmax);
-
+        // Store data
+        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+      }
+      // Uppercut Regime
+      if (boxing_trigger_type == 2 )
+      {
+        // Evaluating scatter Plot
+        c.parseAndEval("accuracyregime();dev.off()");
+        println("Debug2");
+        //Getting path from R for image
+        String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+        //println(pathvariable);
+        //loading image in PImage class for display purpose
+        imgR = loadImage(pathvariable);
+        //deleting generated file to preserve space on server.
+        c.parseAndEval("unlink('test.jpg')");
+        c.serverEval("accuracyregimeerror()");
+        UpCutErr = c.parseAndEval("upcuterrorout()").asInteger();
+        UpCutCount = c.parseAndEval("upcutcount()").asInteger();
         // Store data
         c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
       }
@@ -255,9 +263,9 @@ void draw()
     text("Punches Per Minute Max", 510, 240);
     text(ppmcountmmax, 510, 260);
     image(imgR, 0, 50);
-	 if(ppmcountmmax > Target)
+    if ((ppmcount > Target) && (validframe == 1))
     {
-     EklvyaPort.write('a');
+      EklvyaPort.write('a');
     }
   } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
   {
@@ -267,11 +275,19 @@ void draw()
     text("Max intenisty : ", 510, 260);
     text(intensitymax, 510, 280);
     image(imgR, 0, 50);
+  } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==2))
+  {
+    text("Upper Cut Evaluation: ", 510, 200);
+    text("Error : ", 510, 220);
+    text(UpCutErr/100, 510, 240);
+    text("Best Punches : ", 510, 260);
+    text(UpCutCount, 510, 280);
+    
+    image(imgR, 0, 50);
   } else
   {
-      text("Select Sport Regime After gyro calibration", 510, 200);
-      imgR  = loadImage("test1.jpg");
-      image(imgR, 0, 50);
-    
+    text("Select Sport Regime After gyro calibration", 510, 200);
+    imgR  = loadImage("test1.jpg");
+    image(imgR, 0, 50);
   }
 }
