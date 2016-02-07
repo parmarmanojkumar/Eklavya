@@ -25,7 +25,8 @@ void draw_UI()
           .setBarHeight(15)
           .addItem(" Punches Per Minute ", 1)
           .addItem(" Punch Evaluation ", 1)
-          .addItem(" UpperCut Evaluation ", 1);
+          .addItem(" UpperCut Evaluation ", 1)
+          .addItem(" Synchronisation ", 1);
           ;
   
   customize(d2); // customize the second list

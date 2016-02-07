@@ -13,11 +13,17 @@ initVariables <- function (){
         EulerX <<- 0
         EulerY <<- 0
         EulerZ <<-0
+        EulerX1 <<- 0
+        EulerY1 <<- 0
+        EulerZ1 <<-0
         Finalppm <<- 0
         FinalppmVal <<- 0
         Finalfp <<- 0
         FinalfpVal <<- 0
         UpCutCount <<- 0
+        PointX <<- 0
+        PointY <<- 0
+        PointZ <<- 0
         
         filepath <- "/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/uppercutpunch.txt"
         uppercutdata <- read.table(filepath)
@@ -54,6 +60,13 @@ updateEuler<- function(var1, var2, var3, var4, var5, var6){
         EulerX <<- EulerX %>% c(var1,var4)
         EulerY <<- EulerY %>% c(var2,var5)
         EulerZ <<- EulerZ %>% c(var3,var6)
+}
+
+updateEuler1<- function(var1, var2, var3, var4, var5, var6){
+        #Update Euler
+        EulerX1 <<- EulerX1 %>% c(var1,var4)
+        EulerY1 <<- EulerY1 %>% c(var2,var5)
+        EulerZ1 <<- EulerZ1 %>% c(var3,var6)
 }
 
 updateplot3 <- function(x,y,z, setplot = 0){
@@ -359,6 +372,105 @@ upcutcount <- function(){
 sqrt3d <- function (x1, y1, z1, x2, y2, z2){
         intm <- sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
         intm
+}
+
+positioncalcxyz <- function(x,y,z){
+        #Trapazoidal integration
+        # inte = (x[i] + x[i+1]) * dt /2
+        frame_length = length(x)
+        constant = 0.05 * 0.05 #100 ms data is received
+        
+        positionvalx= PointX[length(PointY)] 
+        positionvaly= PointY[length(PointY)] 
+        positionvalz= PointZ[length(PointZ)]
+        
+        if (frame_length > 2){
+                if(abs(x[frame_length - 2]) > 0.5){
+                        sum = x[frame_length - 2] + 2* x[frame_length - 1] + x[frame_length]
+                        positionvalx = positionvalx + (sum * constant)
+                }
+                if(abs(y[frame_length - 2]) > 0.5){
+                        sum = y[frame_length - 2] + 2* y[frame_length - 1] + y[frame_length]
+                        positionvaly = positionvaly + (sum * constant) 
+                }
+                if(abs(z[frame_length - 2]) > 0.5){
+                        sum = z[frame_length - 2] + 2* z[frame_length - 1] + z[frame_length]
+                        positionvalz = positionvalz + (sum * constant)
+                }
+        }
+        
+        PointX <<- PointX %>% c(positionvalx)
+        PointY <<- PointY %>% c(positionvaly)
+        PointZ <<- PointZ %>% c(positionvalz)
+        return(NULL)
+}
+positionxout <- function(){
+        PointX[length(PointX)] * 10000
+}
+positionyout <- function(){
+        PointY[length(PointY)] * 10000
+}
+positionzout <- function(){
+        PointZ[length(PointZ)] * 10000
+}
+
+updateEuler3 <- function(x,y,z,x1,y1,z1){
+        par(fin= c(5,5),mfrow=c(2,2), lwd = 1 )
+        frame_length = 50
+        idx = length(x) - frame_length
+        idx1 = length(x) - 10
+        if (idx > 0) {
+                plot(x[-idx:0], type='l', ylim = c(0,360),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Heading")
+                lines(x1[-idx:0], type='l',col ='red')
+                plot(y[-idx:0], type='l', ylim = c(-180,180),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Pitch")
+                lines(y1[-idx:0], type='l',col ='red')
+                plot(z[-idx:0], type='l', ylim = c(-180,180),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Roll")
+                lines(z1[-idx:0], type='l',col ='red')
+        }
+        else{
+                plot(x, type='l', ylim = c(0,360),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Heading")
+                lines(x1, type='l',col ='red')
+                plot(y, type='l', ylim = c(-180,180),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Pitch")
+                lines(y1, type='l',col ='red')
+                plot(z, type='l', ylim = c(-180,180),
+                     col = 'blue', xlab = "Time stamp", 
+                     ylab="Angle", main=" Roll")
+                lines(z1, type='l',col ='red')
+        }
+        if(idx1 > 0){
+                s3d <- scatterplot3d(x[-idx1:0],y[-idx1:0],z[-idx1:0],type ='o',
+                                     col.axis="blue",highlight.3d=TRUE, 
+                                     col.grid="lightblue",
+                                     xlab = "Heading", 
+                                     ylab="Pitch",
+                                     zlab="Roll", 
+                                     main="Euler",
+                                     xlim = c(0,360),
+                                     ylim = c(-180,180), zlim = c(-180,180))
+                s3d$points3d(x1[-idx1:0],y1[-idx1:0],z1[-idx1:0],col='red',
+                             type='o', pch = 8)  
+        }else{
+                s3d <- scatterplot3d(x,y,z,type ='o',
+                                     col.axis="blue",highlight.3d=TRUE, 
+                                     col.grid="lightblue",
+                                     xlab = "Heading", 
+                                     ylab="Pitch",
+                                     zlab="Roll", 
+                                     main="Euler",
+                                     xlim = c(0,360),
+                                     ylim = c(-180,180), zlim = c(-180,180))
+                s3d$points3d(x1,y1,z1,col='red',type='o', pch = 8)   
+        }
 }
 
 initVariables()

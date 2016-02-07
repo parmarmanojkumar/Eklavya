@@ -22,8 +22,8 @@ void frame()
   persist = millis();
   dileep = !dileep;
   CalcEuler();
-  print("dileep   ");
-  println(dileep);
+  //print("dileep   ");
+  //println(dileep);
   }
 } 
 
