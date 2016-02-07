@@ -40,6 +40,7 @@ int validSyncSignal = 0;
 boolean toggle = false;
 float boxing_trigger_type = 0; //
 float Target;
+boolean manoj = false;
 
 
 
@@ -153,8 +154,9 @@ void draw()
       }
     }
   }
-  drawCube();
-
+  if (boxing_trigger_type != 3) {
+    drawCube();
+  }
 
   //Step 2 : R connection for single device
   if ((validframe == 1) && (boxing_trigger_type!=3)) // If frame is valid then only process it
@@ -285,125 +287,132 @@ void draw()
     }
   }
 
-    //Syncronisation
-    if (validframe == 1 && validframe1 == 1 && boxing_trigger_type == 3)
-    {
-      // R connection set up
-      try {
 
-        // connect to Rserve (if the user specified a server at the command line, use it, otherwise connect locally)
-        RConnection c = new RConnection();
+  //Syncronisation
+  if (validframe == 1 && validframe1 == 1 && boxing_trigger_type == 3)
+  {
+    //if (manoj)
+    //{
+    // R connection set up
+    try {
 
-        println("Rconnection ReEstablished");
-        String device = "CairoJPEG";
-        // Create jpeg file
-        REXP xp = c.parseAndEval("try(CairoJPEG('test.jpg',quality=90))");
-        if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
-          System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
-          // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
-          REXP w = c.eval("if (exists('last.warning') && length(last.warning)>0) names(last.warning)[1] else 0");
-          if (w.isString()) System.err.println(w.asString());
-          return;
-        }
-        println("Debug1");
-        
-        // Evaluating scatter Plot
-        c.parseAndEval("updateEuler3(EulerX,EulerY,EulerZ,EulerX1,EulerY1,EulerZ1);dev.off()");
-        //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
-        println("Debug2");
-        //Getting path from R for image
-        String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
-        //println(pathvariable);
-        //loading image in PImage class for display purpose
-        imgR = loadImage(pathvariable);
-        //deleting generated file to preserve space on server.
-        c.parseAndEval("unlink('test.jpg')");
-        c.serverEval("updateEuler("+Euler1[0] +","+Euler1[1] +","+Euler1[2] +","+Euler2[0] +","+Euler2[1] +","+Euler2[2]+")");
-        c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
-        
-        
-        
-        //c.close();
-      } 
-      catch (RserveException rse) { // RserveException (transport layer - e.g. Rserve is not running)
-        println(rse);
-      } 
-      catch(Exception e) { // something else
-        println("Something went wrong, but it's not the Rserve: "
-          +e.getMessage());
-        e.printStackTrace();
-      } 
+      // connect to Rserve (if the user specified a server at the command line, use it, otherwise connect locally)
+      RConnection c = new RConnection();
 
-      //image(imgR, 0, 0);
-    }
-    if (validframe == 1) {
-      if (EklvyaPort.available() == 0) {
-        validSyncSignal += 1;
-        if (validSyncSignal%10 == 0)
-        {
-          validSyncSignal = 0;
-          EklvyaPort.write('n');
-
-          if (toggle)
-          {
-
-            EklvyaPort.write('n');
-            //toggle = !toggle;
-          } else
-          {
-            EklvyaPort.write('h');
-          }
-          toggle = !toggle;
-        }
+      println("Rconnection ReEstablished");
+      String device = "CairoJPEG";
+      // Create jpeg file
+      REXP xp = c.parseAndEval("try(CairoJPEG('test.jpg',quality=90))");
+      if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
+        System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
+        // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
+        REXP w = c.eval("if (exists('last.warning') && length(last.warning)>0) names(last.warning)[1] else 0");
+        if (w.isString()) System.err.println(w.asString());
+        return;
       }
-    }
+      println("Debug1");
 
-    //  textAlign(LEFT, TOP);
-    text("EnggEklvyA", 20, 20);
+      // Evaluating scatter Plot
+      c.parseAndEval("updateEuler3(EulerX,EulerY,EulerZ,EulerX1,EulerY1,EulerZ1,1);dev.off()");
+      //c.parseAndEval("write.table(data.frame(LinAccX,LinAccY,LinAccZ), file='/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/data.txt' )");
+      println("Debug2");
+      //Getting path from R for image
+      String pathvariable = c.eval("getwd()").asString() + File.separator + "test.jpg";
+      //println(pathvariable);
+      //loading image in PImage class for display purpose
+      imgR = loadImage(pathvariable);
+      //deleting generated file to preserve space on server.
+      c.parseAndEval("unlink('test.jpg')");
+      c.serverEval("updateEuler("+Euler1[0] +","+Euler1[1] +","+Euler1[2] +","+Euler2[0] +","+Euler2[1] +","+Euler2[2]+")");
+      c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
 
-    text(trigger_list, 510, 160);
-    text(boxing_trigger_type, 650, 160);
-    if ((trigger_list=="Target PPM"))
-    {
-      Target = boxing_trigger_type;
+
+
+      //c.close();
+    } 
+    catch (RserveException rse) { // RserveException (transport layer - e.g. Rserve is not running)
+      println(rse);
+    } 
+    catch(Exception e) { // something else
+      println("Something went wrong, but it's not the Rserve: "
+        +e.getMessage());
+      e.printStackTrace();
     }
-    if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==0))
-    {
-      text("Punches Per Minute", 510, 200);
-      text(ppmcount, 510, 220);
-      text("Punches Per Minute Max", 510, 240);
-      text(ppmcountmmax, 510, 260);
-      image(imgR, 0, 50);
-      if ((ppmcount > Target) && (validframe == 1))
+    //}
+    //manoj= !manoj;
+    //image(imgR, 0, 0);
+  }
+  if (validframe == 1) {
+    if (EklvyaPort.available() == 0) {
+      validSyncSignal += 1;
+      if (validSyncSignal%10 == 0)
       {
-        EklvyaPort.write('a');
+        validSyncSignal = 0;
+        EklvyaPort.write('n');
+
+        if (toggle)
+        {
+
+          EklvyaPort.write('n');
+          //toggle = !toggle;
+        } else
+        {
+          EklvyaPort.write('h');
+        }
+        toggle = !toggle;
       }
-    } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
-    {
-      text("Punch Intensity Evaluation : ", 510, 200);
-      text("Last punch Intensity :", 510, 220);
-      text(intensitycount, 510, 240);
-      text("Max intenisty : ", 510, 260);
-      text(intensitymax, 510, 280);
-      image(imgR, 0, 50);
-    } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==2))
-    {
-      text("Upper Cut Evaluation: ", 510, 200);
-      text("Error : ", 510, 220);
-      text(UpCutErr/100, 510, 240);
-      text("Best Punches : ", 510, 260);
-      text(UpCutCount, 510, 280);
-
-      image(imgR, 0, 50);
-    } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==3))
-    {
-      text("Synchronisation: ", 510, 200);
-
-      image(imgR, 0, 50);
-    } else
-    {
-      text("Select Sport Regime After gyro calibration", 510, 200);
-      imgR  = loadImage("test1.jpg");
-      image(imgR, 0, 50);
     }
   }
+
+  //  textAlign(LEFT, TOP);
+  text("EnggEklvyA", 20, 20);
+
+  text(trigger_list, 510, 160);
+  text(boxing_trigger_type, 650, 160);
+  if ((trigger_list=="Target PPM"))
+  {
+    Target = boxing_trigger_type;
+  }
+  if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==0))
+  {
+    text("Punches Per Minute", 510, 200);
+    text(ppmcount, 510, 220);
+    text("Punches Per Minute Max", 510, 240);
+    text(ppmcountmmax, 510, 260);
+    image(imgR, 0, 50);
+    if ((ppmcount > Target) && (validframe == 1))
+    {
+      EklvyaPort.write('a');
+    } else if (((ppmcount < Target-20) && (ppmcount > 12)&& (validframe == 1)))
+    {
+      EklvyaPort.write('b');
+    }
+  } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==1))
+  {
+    text("Punch Intensity Evaluation : ", 510, 200);
+    text("Last punch Intensity :", 510, 220);
+    text(intensitycount, 510, 240);
+    text("Max intenisty : ", 510, 260);
+    text(intensitymax, 510, 280);
+    image(imgR, 0, 50);
+  } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==2))
+  {
+    text("Upper Cut Evaluation: ", 510, 200);
+    text("Error : ", 510, 220);
+    text(UpCutErr/100, 510, 240);
+    text("Best Punches : ", 510, 260);
+    text(UpCutCount, 510, 280);
+
+    image(imgR, 0, 50);
+  } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==3))
+  {
+    text("Synchronisation: ", 510, 200);
+
+    image(imgR, 0, 50);
+  } else
+  {
+    text("Select Sport Regime After gyro calibration", 510, 200);
+    imgR  = loadImage("test1.jpg");
+    image(imgR, 0, 50);
+  }
+}

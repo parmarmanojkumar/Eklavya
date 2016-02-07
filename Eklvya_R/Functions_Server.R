@@ -414,62 +414,80 @@ positionzout <- function(){
         PointZ[length(PointZ)] * 10000
 }
 
-updateEuler3 <- function(x,y,z,x1,y1,z1){
-        par(fin= c(5,5),mfrow=c(2,2), lwd = 1 )
-        frame_length = 50
-        idx = length(x) - frame_length
-        idx1 = length(x) - 10
-        if (idx > 0) {
-                plot(x[-idx:0], type='l', ylim = c(0,360),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Heading")
-                lines(x1[-idx:0], type='l',col ='red')
-                plot(y[-idx:0], type='l', ylim = c(-180,180),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Pitch")
-                lines(y1[-idx:0], type='l',col ='red')
-                plot(z[-idx:0], type='l', ylim = c(-180,180),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Roll")
-                lines(z1[-idx:0], type='l',col ='red')
+updateEuler3 <- function(x,y,z,x1,y1,z1,flag =0){
+        if(flag == 0){
+                par(fin= c(5,5),mfrow=c(2,2), lwd = 1 )
+                frame_length = 50
+                idx = length(x) - frame_length
+                idx1 = length(x) - 10
+                if (idx > 0) {
+                        plot(x[-idx:0], type='l', ylim = c(0,360),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Heading")
+                        lines(x1[-idx:0], type='l',col ='red')
+                        plot(y[-idx:0], type='l', ylim = c(-180,180),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Pitch")
+                        lines(y1[-idx:0], type='l',col ='red')
+                        plot(z[-idx:0], type='l', ylim = c(-180,180),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Roll")
+                        lines(z1[-idx:0], type='l',col ='red')
+                }
+                else{
+                        plot(x, type='l', ylim = c(0,360),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Heading")
+                        lines(x1, type='l',col ='red')
+                        plot(y, type='l', ylim = c(-180,180),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Pitch")
+                        lines(y1, type='l',col ='red')
+                        plot(z, type='l', ylim = c(-180,180),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Roll")
+                        lines(z1, type='l',col ='red')
+                }
+                if(idx1 > 0){
+                        s3d <- scatterplot3d(x[-idx1:0],y[-idx1:0],z[-idx1:0],type ='o',
+                                             col.axis="blue",highlight.3d=TRUE, 
+                                             col.grid="lightblue",
+                                             xlab = "Heading", 
+                                             ylab="Pitch",
+                                             zlab="Roll", 
+                                             main="Euler",
+                                             xlim = c(0,360),
+                                             ylim = c(-180,180), zlim = c(-180,180))
+                        s3d$points3d(x1[-idx1:0],y1[-idx1:0],z1[-idx1:0],col='red',
+                                     type='o', pch = 8)  
+                }else{
+                        s3d <- scatterplot3d(x,y,z,type ='o',
+                                             col.axis="blue",highlight.3d=TRUE, 
+                                             col.grid="lightblue",
+                                             xlab = "Heading", 
+                                             ylab="Pitch",
+                                             zlab="Roll", 
+                                             main="Euler",
+                                             xlim = c(0,360),
+                                             ylim = c(-180,180), zlim = c(-180,180))
+                        s3d$points3d(x1,y1,z1,col='red',type='o', pch = 8)   
         }
-        else{
-                plot(x, type='l', ylim = c(0,360),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Heading")
-                lines(x1, type='l',col ='red')
-                plot(y, type='l', ylim = c(-180,180),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Pitch")
-                lines(y1, type='l',col ='red')
-                plot(z, type='l', ylim = c(-180,180),
-                     col = 'blue', xlab = "Time stamp", 
-                     ylab="Angle", main=" Roll")
-                lines(z1, type='l',col ='red')
-        }
-        if(idx1 > 0){
-                s3d <- scatterplot3d(x[-idx1:0],y[-idx1:0],z[-idx1:0],type ='o',
-                                     col.axis="blue",highlight.3d=TRUE, 
-                                     col.grid="lightblue",
-                                     xlab = "Heading", 
-                                     ylab="Pitch",
-                                     zlab="Roll", 
-                                     main="Euler",
-                                     xlim = c(0,360),
-                                     ylim = c(-180,180), zlim = c(-180,180))
-                s3d$points3d(x1[-idx1:0],y1[-idx1:0],z1[-idx1:0],col='red',
-                             type='o', pch = 8)  
         }else{
-                s3d <- scatterplot3d(x,y,z,type ='o',
-                                     col.axis="blue",highlight.3d=TRUE, 
-                                     col.grid="lightblue",
-                                     xlab = "Heading", 
-                                     ylab="Pitch",
-                                     zlab="Roll", 
-                                     main="Euler",
-                                     xlim = c(0,360),
-                                     ylim = c(-180,180), zlim = c(-180,180))
-                s3d$points3d(x1,y1,z1,col='red',type='o', pch = 8)   
+                par(fin= c(5,5),mfrow=c(1,1), lwd = 1 )
+                frame_length = 10
+                idx = length(x) - frame_length 
+                if (idx > 0) {
+                        plot(x[-idx:0], type='l', ylim = c(0,360),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Heading")
+                        lines(x1[-idx:0], type='l',col ='red')
+                }
+                else{
+                        plot(x, type='l', ylim = c(0,360),
+                             col = 'blue', xlab = "Time stamp", 
+                             ylab="Angle", main=" Heading")
+                        lines(x1, type='l',col ='red')
+                }
         }
 }
 
