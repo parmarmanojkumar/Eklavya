@@ -11,7 +11,6 @@ void draw_UI()
           .setItemHeight(20)
           .setBarHeight(15)
           .addItem(" Boxing ", 1)
-          .addItem(" Fencing ", 1);
           ;
           
   customize(d1); // customize the first list
@@ -26,7 +25,6 @@ void draw_UI()
           .addItem(" Punches Per Minute ", 1)
           .addItem(" Punch Evaluation ", 1)
           .addItem(" UpperCut Evaluation ", 1)
-          .addItem(" Synchronisation ", 1);
           ;
   
   customize(d2); // customize the second list

@@ -5,7 +5,7 @@ import processing.opengl.*;
 import controlP5.*;
 
 //UI related parameters
-ControlP5 cp5; //control pbject for dropdown boxes
+ControlP5 cp5; //control object for dropdown boxes
 DropdownList d1, d2;
 PFont font ;
 int cnt;
@@ -31,7 +31,7 @@ float[] linAcc21 = new float[3]; // Frame 2 LinAccX, LinAccY, LinAccZ
 float[] gravAcc11 = new float[3]; //Frame 1 GravAccX, GravAccY, GravAccZ
 float[] gravAcc21 = new float[3]; //Frame 2 GravAccX, GravAccY, GravAccZ
 float[] Euler11 = new float[3]; //Frame 1 EulerX, EulerY, EulerZ
-float[] Euler21 = new float[3]; //Frame 1 EulerX, EulerY, EulerZ
+float[] Euler21 = new float[3]; //Frame 2 EulerX, EulerY, EulerZ
 
 float[] Euler = new float[3]; //Frame animation
 PImage imgR  ; //image received from R
@@ -39,7 +39,6 @@ int validSyncSignal = 0;
 boolean toggle = false;
 float boxing_trigger_type = 0; //
 float Target;
-boolean manoj = false;
 // OS flag for independent OS working
 boolean macosflag = false;
 // for synchronisation, use dual serial communication
@@ -59,7 +58,7 @@ void setup()
   //println(url);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[0]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[3]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   if (dualSerial) {
     portname = Serial.list()[0]; // assigning  usbmodem1421- original
@@ -117,7 +116,7 @@ void setup()
       +e.getMessage());
     e.printStackTrace();
   }
-  imgR  = loadImage("test1.jpg");
+  imgR  = loadImage("calibration_sensor.jpg");
 }
 
 // Main function
@@ -363,8 +362,6 @@ void draw()
   //Syncronisation
   if (validframe == 1 && validframe1 == 1 && boxing_trigger_type == 3)
   {
-    //if (manoj)
-    //{
     // R connection set up
     try {
 
@@ -414,9 +411,7 @@ void draw()
         +e.getMessage());
       e.printStackTrace();
     }
-    //}
-    //manoj= !manoj;
-    //image(imgR, 0, 0);
+
   }
   if (validframe == 1) {
     if (EklvyaPort.available() == 0) {
@@ -455,7 +450,6 @@ void draw()
     text(ppmcount, 510, 220);
     text("Punches Per Minute Max", 510, 240);
     text(ppmcountmmax, 510, 260);
-    image(imgR, 0, 50);
     if ((ppmcount > Target) && (validframe == 1))
     {
       EklvyaPort.write('a');
@@ -470,7 +464,6 @@ void draw()
     text(intensitycount, 510, 240);
     text("Max intenisty : ", 510, 260);
     text(intensitymax, 510, 280);
-    image(imgR, 0, 50);
   } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==2))
   {
     text("Upper Cut Evaluation: ", 510, 200);
@@ -479,16 +472,15 @@ void draw()
     text("Best Punches : ", 510, 260);
     text(UpCutCount, 510, 280);
 
-    image(imgR, 0, 50);
   } else if ((trigger_list=="Sport_Regime") && (boxing_trigger_type==3))
   {
     text("Synchronisation: ", 510, 200);
 
-    image(imgR, 0, 50);
+
   } else
   {
     text("Select Sport Regime After gyro calibration", 510, 200);
-    imgR  = loadImage("test1.jpg");
-    image(imgR, 0, 50);
+    imgR  = loadImage("calibration_sensor.jpg");
   }
+  image(imgR, 0, 50);
 }

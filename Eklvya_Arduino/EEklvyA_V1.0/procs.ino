@@ -1,9 +1,13 @@
 void proc_ini()
 {
+  //Os counter
   count10 = count50 = count100 = count200 = count500 = 0;
+  //Pin configuration for buzzer
   pinMode(led, OUTPUT);
   pinMode(Buzzer1, OUTPUT);
   pinMode(Buzzer1, OUTPUT);
+  
+  // To indicate everything is fine
   Buzz(led);
   //delay(1000);
   StopBuzz(led);
@@ -16,21 +20,11 @@ void proc_ini()
 
 void proc_10ms()
 {
-  /*
-  Serial.println();
-  Serial.print("proc_10:  ");
-  Serial.print(count10);
-  */
+  // Nothing.. Too fast . :)
 }
 
 void proc_50ms()
 {
-  /*
-  count10 = 0;
-  Serial.println();
-  Serial.print("proc_50:  ");
-  Serial.print(count50);
-  */
 
   if (Buzz1req == 1)
   {
@@ -61,14 +55,8 @@ void proc_50ms()
 
 void proc_100ms()
 {
-  /*
-  count10 = 0;
-  count50 = 0;
-  Serial.println();
-  Serial.print("proc_100:  ");
-  Serial.print(count100);
-  */
 
+  //Collect Data
   getSensorData();
 
   if (!frame)
@@ -128,15 +116,6 @@ void proc_100ms()
 
 void proc_200ms()
 {
-  /*
-  count10 = 0;
-  count50 = 0;
-  count100 = 0;
-  Serial.println();
-  Serial.print("proc_250:  ");
-  Serial.print(count250);
-  */
-
   // Serial Framing
 
   Serial.print("F1,");
@@ -147,7 +126,7 @@ void proc_200ms()
   str2 = "";
   frame = 0;
 
-  // Serial recieving
+  // Serial recieving for buzzing the haptic feedback
   if (Serial.available())
   {
     cmd = Serial.read();
@@ -166,12 +145,5 @@ void proc_200ms()
 
 void proc_500ms()
 {
-  /*
-  count10 = 0;
-  count50 = 0;
-  count100 = 0;
-  Serial.println();
-  Serial.print("proc_500:  ");
-  Serial.print(count500);
-  */
+  //Nothing
 }
