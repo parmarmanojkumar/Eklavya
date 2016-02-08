@@ -1,5 +1,4 @@
 import processing.serial.*;
-import org.jfree.*;
 import org.rosuda.REngine.Rserve.*;
 import org.rosuda.REngine.*;
 import processing.opengl.*;
@@ -41,7 +40,10 @@ boolean toggle = false;
 float boxing_trigger_type = 0; //
 float Target;
 boolean manoj = false;
-
+// OS flag for independent OS working
+boolean macosflag = false;
+// for synchronisation, use dual serial communication
+boolean dualSerial = false;
 
 
 //Initial set up 
@@ -51,20 +53,32 @@ void setup()
 {
   size(800, 600, OPENGL);
   background(0);
+    URL url = Eklvya.class.getProtectionDomain().getCodeSource().getLocation();
+  println(url);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[1]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[3]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
-  portname = Serial.list()[3]; // assigning  usbmodem1421- original
+  if (dualSerial){
+  portname = Serial.list()[0]; // assigning  usbmodem1421- original
   EklvyaPort1 = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
+  }
+  macosflag = System.getProperty("os.name").toLowerCase().contains("mac");
+
   draw_UI();
   // R connection set up
   try {
 
     // connect to Rserve (if the user specified a server at the command line, use it, otherwise connect locally)
     RConnection c = new RConnection(); // R connection
-    c.serverEval("require(scatterplot3d); require(Cairo); require(dplyr)");
-    c.serverEval("source('/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/Functions_Server.R')");
+    if (macosflag) {
+      c.serverEval("require(scatterplot3d); require(Cairo); require(dplyr)");
+      c.serverEval("source('/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/Functions_Server.R')");
+    } else {
+      c.parseAndEval("require(scatterplot3d); require(Cairo); require(dplyr)");
+      // Put absolute path for file
+      c.parseAndEval("source('.../Eklvya_Repo/Eklvya_R/Functions_Server.R')");
+    }
 
     println("Rconnection Established");
 
@@ -129,7 +143,7 @@ void draw()
   }
 
   int validframe1 = 0; // to check valiity of frame
-  if (EklvyaPort1.available() > 0) // If data  is avilable on serial
+  if (dualSerial && EklvyaPort1.available() > 0 ) // If data  is avilable on serial
   { 
     EklvyaData1 = EklvyaPort1.readStringUntil('\n'); // Read data from serial
     if (EklvyaData1 != null) // to check real data is available 
@@ -209,13 +223,23 @@ void draw()
         imgR = loadImage(pathvariable);
         //deleting generated file to preserve space on server.
         c.parseAndEval("unlink('test.jpg')");
+        if (macosflag) {
+          c.serverEval("punchperminutecount()");
+        }else{
+          c.parseAndEval("punchperminutecount()");
+        }
 
-        c.serverEval("punchperminutecount()");
+        
         ppmcount = c.parseAndEval("punchperminutout()").asInteger();
         ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
 
         // Store data
-        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        if (macosflag) {
+          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }else{
+          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }
+        
       }
       // Intensity regime with punch force
       if (boxing_trigger_type == 1 )
@@ -230,11 +254,20 @@ void draw()
         imgR = loadImage(pathvariable);
         //deleting generated file to preserve space on server.
         c.parseAndEval("unlink('test.jpg')");
-        c.serverEval("intensitycount()");
+        if (macosflag) {
+          c.serverEval("intensitycount()");
+        }else{
+          c.parseAndEval("intensitycount()");
+        }
+        
         intensitycount = c.parseAndEval("lastintenistyout()").asInteger();
         intensitymax = c.parseAndEval("intensitymax()").asInteger();
         // Store data
-        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        if (macosflag) {
+          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }else{
+          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }
       }
       // Uppercut Regime
       if (boxing_trigger_type == 2 )
@@ -249,17 +282,31 @@ void draw()
         imgR = loadImage(pathvariable);
         //deleting generated file to preserve space on server.
         c.parseAndEval("unlink('test.jpg')");
-        c.serverEval("accuracyregimeerror()");
+        if (macosflag) {
+          c.serverEval("accuracyregimeerror()");
+        }else{
+          c.parseAndEval("accuracyregimeerror()");
+        }
         UpCutErr = c.parseAndEval("upcuterrorout()").asInteger();
         UpCutCount = c.parseAndEval("upcutcount()").asInteger();
         // Store data
-        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        if (macosflag) {
+          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }else{
+          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }
       }
       // Uppercut Regime Not working
       if (boxing_trigger_type == 30 )
       {
         // Evaluating scatter Plot
-        c.serverEval("positioncalcxyz(LinAccX,LinAccY,LinAccZ)");
+        c.parseAndEval("unlink('test.jpg')");
+        if (macosflag) {
+          c.serverEval("positioncalcxyz(LinAccX,LinAccY,LinAccZ)");
+        }else{
+          c.parseAndEval("positioncalcxyz(LinAccX,LinAccY,LinAccZ)");
+        }
+        
         println("Debug2");
         xcor = c.parseAndEval("positionxout()").asInteger();
         ycor = c.parseAndEval("positionyout()").asInteger();
@@ -271,7 +318,11 @@ void draw()
         print("zcor    "); 
         println(zcor/100);
         // Store data
-        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        if (macosflag) {
+          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }else{
+          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        }
       }
 
       // close RConnection, we're done
@@ -323,8 +374,13 @@ void draw()
       imgR = loadImage(pathvariable);
       //deleting generated file to preserve space on server.
       c.parseAndEval("unlink('test.jpg')");
-      c.serverEval("updateEuler("+Euler1[0] +","+Euler1[1] +","+Euler1[2] +","+Euler2[0] +","+Euler2[1] +","+Euler2[2]+")");
-      c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
+      if (macosflag) {
+          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+          c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
+        }else{
+          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+          c.parseAndEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
+        }
 
 
 
@@ -383,7 +439,7 @@ void draw()
     if ((ppmcount > Target) && (validframe == 1))
     {
       EklvyaPort.write('a');
-    } else if (((ppmcount < Target-20) && (ppmcount > 12)&& (validframe == 1)))
+    } else if (((ppmcount < Target-24) && (ppmcount > 12)&& (validframe == 1)))
     {
       EklvyaPort.write('b');
     }
