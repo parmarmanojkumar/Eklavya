@@ -24,12 +24,10 @@ initVariables <- function (){
         PointX <<- 0
         PointY <<- 0
         PointZ <<- 0
-        
-        filepath <- "/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/uppercutpunch.txt"
-        uppercutdata <- read.table(filepath)
-        UpCutLinAccX <<- uppercutdata$meanpatternX
-        UpCutLinAccY <<- uppercutdata$meanpatternY
-        UpCutLinAccZ <<- uppercutdata$meanpatternZ
+        # Removed file reading for os independency
+        UpCutLinAccX <<- c(1.9466667,2.4733333,1.2700000,-0.5600000,5.6350000,25.6966667,13.6916667,-44.2316667,-19.1766667,2.5650000,0.4316667,0.8316667,1.0133333)
+        UpCutLinAccY <<- c(-0.01666667,0.84166667,-1.06000000,-3.71166667,-8.72166667,5.22500000,27.80666667,11.59000000,12.75500000,7.18333333,5.46833333,3.49666667,1.72500000)
+        UpCutLinAccZ <<- c( 1.7966667,0.5116667,0.9383333,1.7633333,-6.0400000,-20.5300000,-28.3933333,-17.8416667,-1.1800000,-11.2083333,-2.8333333 ,0.3850000,2.4266667)
         UpCutLm <<- lm(UpCutLinAccZ ~ UpCutLinAccX + UpCutLinAccY)
         UpCutErr <<- 0
         
