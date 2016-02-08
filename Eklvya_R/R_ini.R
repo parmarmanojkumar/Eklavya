@@ -1,9 +1,10 @@
-install.packages(c("Cairo", "scatterplot3d","dplyr","Rserve"))
-library(c("Cairo", "scatterplot3d","dplyr","Rserve"))
-require(Rserve)
+install.packages(c("jpeg","cairoDevice","Cairo", "scatterplot3d","dplyr","Rserve"))
+require(c("Cairo","cairoDevice", "scatterplot3d","dplyr","Rserve"))
 Rserve(args = '--no-save --RS-enable-control')
 require(RSclient)
 c <- RS.connect()
 RS.close(c)
-
+CairoJPEG("testdel.jpg", quality = 90)
+plot(1:10)
+dev.off()
 

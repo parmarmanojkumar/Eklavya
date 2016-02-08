@@ -44,6 +44,8 @@ boolean manoj = false;
 boolean macosflag = false;
 // for synchronisation, use dual serial communication
 boolean dualSerial = false;
+//print device for R
+String device = "jpeg";
 
 
 //Initial set up 
@@ -53,34 +55,55 @@ void setup()
 {
   size(800, 600, OPENGL);
   background(0);
-    URL url = Eklvya.class.getProtectionDomain().getCodeSource().getLocation();
-  println(url);
+  // URL url = Eklvya.class.getProtectionDomain().getCodeSource().getLocation();
+  //println(url);
   // Serial Port Setup
   println (Serial.list()); // To figure out the serial port 
-  String portname = Serial.list()[3]; // assigning  usbmodem1421- original
+  String portname = Serial.list()[0]; // assigning  usbmodem1421- original
   EklvyaPort = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
-  if (dualSerial){
-  portname = Serial.list()[0]; // assigning  usbmodem1421- original
-  EklvyaPort1 = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
+  if (dualSerial) {
+    portname = Serial.list()[0]; // assigning  usbmodem1421- original
+    EklvyaPort1 = new Serial(this, portname, EklvyaBaudRate); // Assigning port with baud rate
   }
   macosflag = System.getProperty("os.name").toLowerCase().contains("mac");
-
+  println(macosflag);
   draw_UI();
   // R connection set up
   try {
 
     // connect to Rserve (if the user specified a server at the command line, use it, otherwise connect locally)
     RConnection c = new RConnection(); // R connection
+
     if (macosflag) {
-      c.serverEval("require(scatterplot3d); require(Cairo); require(dplyr)");
+      c.serverEval("require(scatterplot3d); require(dplyr); require(jpeg)");
       c.serverEval("source('/Users/VirKrupa/Documents/99_hackathon/Eklvya_Repo/Eklvya_R/Functions_Server.R')");
+      device="CairoJPEG"; // great, we can use Cairo device
     } else {
-      c.parseAndEval("require(scatterplot3d); require(Cairo); require(dplyr)");
+      c.parseAndEval("require(scatterplot3d); require(dplyr); require(jpeg)");
       // Put absolute path for file
-      c.parseAndEval("source('.../Eklvya_Repo/Eklvya_R/Functions_Server.R')");
+      c.parseAndEval("source(\'C://Users//Meera//Documents//Eklavya//Eklvya_R//Functions_Server.R')");
+    }
+    // we are careful here - not all R binaries support jpeg
+    // so we rather capture any failures
+    REXP xp = c.parseAndEval("try("+device+"('test.jpg',quality=90))");
+
+    if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
+      System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
+      // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
+      REXP w = c.eval("if (exists('last.warning') && length(last.warning)>0) names(last.warning)[1] else 0");
+      if (w.isString()) System.err.println(w.asString());
+      return;
     }
 
-    println("Rconnection Established");
+    // ok, so the device should be fine - let's plot - replace this by any plotting code you desire ...
+    c.parseAndEval("data(iris); attach(iris); plot(Sepal.Length, Petal.Length, col=unclass(Species)); dev.off()");
+
+    // There is no I/O API in REngine because it's actually more efficient to use R for this
+    // we limit the file size to 1MB which should be sufficient and we delete the file as well
+    xp = c.parseAndEval("r=readBin('test.jpg','raw',1024*1024); unlink('test.jpg'); r");
+
+
+    println("Rconnection Established & working fine");
 
 
     // close RConnection, we're done
@@ -198,9 +221,8 @@ void draw()
       RConnection c = new RConnection();
 
       println("Rconnection ReEstablished");
-      String device = "CairoJPEG";
       // Create jpeg file
-      REXP xp = c.parseAndEval("try(CairoJPEG('test.jpg',quality=90))");
+      REXP xp = c.parseAndEval("try("+device+"('test.jpg',quality=90))");
       if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
         System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
         // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
@@ -225,21 +247,20 @@ void draw()
         c.parseAndEval("unlink('test.jpg')");
         if (macosflag) {
           c.serverEval("punchperminutecount()");
-        }else{
+        } else {
           c.parseAndEval("punchperminutecount()");
         }
 
-        
+
         ppmcount = c.parseAndEval("punchperminutout()").asInteger();
         ppmcountmmax = c.parseAndEval("punchperminutemax()").asInteger();
 
         // Store data
         if (macosflag) {
           c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-        }else{
+        } else {
           c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
         }
-        
       }
       // Intensity regime with punch force
       if (boxing_trigger_type == 1 )
@@ -256,16 +277,16 @@ void draw()
         c.parseAndEval("unlink('test.jpg')");
         if (macosflag) {
           c.serverEval("intensitycount()");
-        }else{
+        } else {
           c.parseAndEval("intensitycount()");
         }
-        
+
         intensitycount = c.parseAndEval("lastintenistyout()").asInteger();
         intensitymax = c.parseAndEval("intensitymax()").asInteger();
         // Store data
         if (macosflag) {
           c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-        }else{
+        } else {
           c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
         }
       }
@@ -284,7 +305,7 @@ void draw()
         c.parseAndEval("unlink('test.jpg')");
         if (macosflag) {
           c.serverEval("accuracyregimeerror()");
-        }else{
+        } else {
           c.parseAndEval("accuracyregimeerror()");
         }
         UpCutErr = c.parseAndEval("upcuterrorout()").asInteger();
@@ -292,7 +313,7 @@ void draw()
         // Store data
         if (macosflag) {
           c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-        }else{
+        } else {
           c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
         }
       }
@@ -303,10 +324,10 @@ void draw()
         c.parseAndEval("unlink('test.jpg')");
         if (macosflag) {
           c.serverEval("positioncalcxyz(LinAccX,LinAccY,LinAccZ)");
-        }else{
+        } else {
           c.parseAndEval("positioncalcxyz(LinAccX,LinAccY,LinAccZ)");
         }
-        
+
         println("Debug2");
         xcor = c.parseAndEval("positionxout()").asInteger();
         ycor = c.parseAndEval("positionyout()").asInteger();
@@ -320,7 +341,7 @@ void draw()
         // Store data
         if (macosflag) {
           c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-        }else{
+        } else {
           c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
         }
       }
@@ -351,9 +372,8 @@ void draw()
       RConnection c = new RConnection();
 
       println("Rconnection ReEstablished");
-      String device = "CairoJPEG";
       // Create jpeg file
-      REXP xp = c.parseAndEval("try(CairoJPEG('test.jpg',quality=90))");
+      REXP xp = c.parseAndEval("try("+device+"('test.jpg',quality=90))");
       if (xp.inherits("try-error")) { // if the result is of the class try-error then there was a problem
         System.err.println("Can't open "+device+" graphics device:\n"+xp.asString());
         // this is analogous to 'warnings', but for us it's sufficient to get just the 1st warning
@@ -375,12 +395,12 @@ void draw()
       //deleting generated file to preserve space on server.
       c.parseAndEval("unlink('test.jpg')");
       if (macosflag) {
-          c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-          c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
-        }else{
-          c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
-          c.parseAndEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
-        }
+        c.serverEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        c.serverEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
+      } else {
+        c.parseAndEval("updateLinAcc("+linAcc1[0] +","+linAcc1[1] +","+linAcc1[2] +","+linAcc2[0] +","+linAcc2[1] +","+linAcc2[2]+")");
+        c.parseAndEval("updateEuler1("+Euler11[0] +","+Euler11[1] +","+Euler11[2] +","+Euler21[0] +","+Euler21[1] +","+Euler21[2]+")");
+      }
 
 
 
